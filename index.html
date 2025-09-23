@@ -21,17 +21,16 @@
     .stage{ position:fixed; inset:0; overflow:hidden; background:#05080c; min-height:100vh; }
     @supports (height: 100svh){ .stage{ min-height:100svh; } }
 
-    .poster{
-      position:absolute; inset:0;
-      background-image: var(--poster);
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position:center;
-      filter: contrast(1.00) saturate(1.12);
-      animation: kb var(--speed, 28s) ease-in-out infinite alternate; /* subtle Ken Burns */
-      will-change: transform;
-    }
-    @keyframes kb{ 0%{ transform: scale(1.02)} 100%{ transform: scale(1.06)} }
+    .poster{ display:none; } /* background-div no longer used */
+
+    .frame{ position:absolute; inset:0; display:grid; place-items:center; overflow:hidden; }
+    .poster-img{ max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; image-rendering:auto; will-change:transform; animation: kbimg var(--speed, 45s) ease-in-out infinite alternate; filter: contrast(1.02) saturate(1.06); }
+    @keyframes kbimg{ 0%{ transform: scale(1.0) translate3d(0,0,0) rotate(0deg)} 50%{ transform: scale(1.08) translate3d(1%, -1%, 0) rotate(0.15deg)} 100%{ transform: scale(1.12) translate3d(-1%, 1%, 0) rotate(-0.15deg)} }
+    @keyframes kb{
+      0%{ transform: scale(1.0) translate3d(0,0,0) }
+      50%{ transform: scale(1.08) translate3d(1%, -1%, 0) }
+      100%{ transform: scale(1.12) translate3d(-1%, 1%, 0) }
+    } 100%{ transform: scale(1.06)} }
 
     .backfill{ display:none; } /* remove blurred duplicate backfill */
 
@@ -60,7 +59,9 @@
 <body>
   <a class="sr-only" href="#main">Skip to content</a>
   <div class="stage" aria-hidden="true">
-    <div class="poster"></div>
+    <div class="frame">
+      <img class="poster-img" src="new-energy-poster.jpeg" alt="New Energy Festival Poster" />
+    </div>
     <div class="sweep"></div>
     <div class="grain"></div>
   </div>
@@ -69,5 +70,15 @@
     <a href="https://your-ticket-link.com" target="_blank" rel="noopener">Buy Tix</a>
   </main>
 
+  <script>
+    // Allow ?img= override while defaulting to current jpeg path
+    (function(){
+      const url = new URL(window.location.href);
+      const img = url.searchParams.get('img');
+      if(img){
+        document.querySelector('.poster-img').setAttribute('src', img);
+      }
+    })();
+  </script>
 </body>
 </html>
