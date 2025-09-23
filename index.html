@@ -22,7 +22,8 @@
     html,body{height:100%}
     body{ margin:0; background:var(--bg); color:#fff; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
 
-    .stage{ position:fixed; inset:0; overflow:hidden; background:#05080c; }
+    .stage{ position:fixed; inset:0; overflow:hidden; background:#05080c; min-height:100vh; }
+    @supports (height: 100svh){ .stage{ min-height:100svh; } }
 
     .poster{
       position:absolute; inset:0;
@@ -42,7 +43,10 @@
 
     .backfill{ position:absolute; inset:-2vmax; z-index:-1; background-image: var(--poster); background-size: cover; background-position:center; filter: blur(36px) brightness(0.55) saturate(1.2); transform: scale(1.08); }
     @media (max-aspect-ratio: 3/4){
-      .poster{ background-size: cover; inset:-2vmax; }
+      /* On tall/portrait screens, keep the full poster visible */
+      .poster{ background-size: contain; inset:0; }
+      .backfill{ filter: blur(24px) brightness(0.48) saturate(1.2); }
+    }
       .backfill{ filter: blur(28px) brightness(0.5) saturate(1.2); }
     }
 
@@ -73,7 +77,7 @@
       animation: shimmer 12s linear infinite; }
     @keyframes shimmer{ from{ transform: translateY(0);} to{ transform: translateY(-24px);} }
 
-    .cta{ position: fixed; left: 50%; bottom: 6vh; transform: translateX(-50%); z-index: 3; }
+    .cta{ position: fixed; left: 50%; bottom: calc(6vh + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 3;  transform: translateX(-50%); z-index: 3; }
     .cta a{ display:inline-block; padding:14px 22px; border-radius:999px; text-decoration:none; color:#02060a; background:#e6fff6; font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:14px; box-shadow:0 10px 30px rgba(102,255,204,0.28); transition: transform .2s ease, box-shadow .2s ease; }
     .cta a:hover{ transform: translateY(-1px); box-shadow:0 14px 34px rgba(102,255,204,0.4);} 
 
