@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>New Energy Festival — Poster Landing</title>
-  <meta name="description" content="New Energy — a clean‑powered music festival. Creative, artsy, vibey. Pilot: Oct 18, 2025 • Governors Island." />
+  <meta name="description" content="New Energy — a clean-powered music festival. Creative, artsy, vibey. Pilot: Oct 18, 2025 • Governors Island." />
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
   <style>
     :root{
       --bg:#0b0f14;
-      --poster:url('new-energy-poster.jpeg'); /* replace with your file name (.png/.jpg) */
+      --poster:url('new-energy-poster.jpeg'); /* adjust path/extension if needed */
       --grain-alpha: .09;   /* overall grain strength */
       --scan-alpha: .08;    /* scanline strength */
       --glow-a:#66ffcc;     /* accent glow colors */
@@ -22,16 +22,14 @@
     html,body{height:100%}
     body{ margin:0; background:var(--bg); color:#fff; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
 
-    /* ===== Stage ===== */
     .stage{ position:fixed; inset:0; overflow:hidden; background:#05080c; }
 
-    /* Poster layer */
     .poster{
-      position:absolute; inset:0; /* show full poster without cropping */
+      position:absolute; inset:0;
       background-image: var(--poster);
-      background-size: contain; /* don't crop; letterbox instead */
+      background-size: contain;
       background-repeat: no-repeat;
-      background-position:center; 
+      background-position:center;
       filter: contrast(1.02) saturate(1.06);
       animation: kenburns var(--speed) ease-in-out infinite alternate;
       will-change: transform;
@@ -41,68 +39,45 @@
       50%  { transform: scale(1.02) translate3d(0, 0, 0) rotate(0deg); }
       100% { transform: scale(1.04) translate3d(0, 0, 0) rotate(0deg); }
     }
-      50%  { transform: scale(1.045) translate3d(1.2%, -0.6%, 0) rotate(-0.2deg); }
-      100% { transform: scale(1.07) translate3d(-1.4%, 0.8%, 0) rotate(0.25deg); }
-    }
 
-    /* Moving color caustics for that vibey CG feel */
-    .caustics{
-      position:absolute; inset:-20vmax; mix-blend-mode:overlay; opacity:.35; pointer-events:none;
-      background:
-        radial-gradient(50% 60% at 30% 40%, var(--glow-a) 0%, transparent 60%),
-        radial-gradient(60% 50% at 70% 60%, var(--glow-b) 0%, transparent 60%);
-      filter: blur(60px) saturate(140%);
-      animation: drift calc(var(--speed)*1.2) linear infinite;
-    }
-    @keyframes drift{ to { transform: translate3d(8%, -6%, 0) rotate(30deg); } }
-
-    /* Gentle sweep highlight */
-    .sweep{
-      position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.35;
-      background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,.35) 50%, transparent 60%);
-      background-size: 200% 100%;
-      animation: sweep 7s ease-in-out infinite;
-      filter: blur(4px);
-    }
-    @keyframes sweep { 0%, 100% { background-position: -100% 0; } 50% { background-position: 100% 0; } }
-
-    /* Subtle chromatic aberration shimmer */
-    .rgb{ position:absolute; inset:0; mix-blend-mode:screen; opacity:.18; pointer-events:none; filter: blur(1px);
-      background-image: var(--poster);
-      background-size: cover; background-position:center; 
-      animation: rgb 3.6s ease-in-out infinite;
-    }
-    @keyframes rgb{ 0%,100%{ transform: translate(0,0);} 50%{ transform: translate(0.6px,-0.8px);} }
-
-    /* Grain + scanlines */
-    .grain{ position:absolute; inset:0; pointer-events:none; opacity:var(--grain-alpha); mix-blend-mode:overlay;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.7"/></svg>');
-      background-size: 220px 220px;
-      animation: grain 1.8s steps(6) infinite;
-    }
-    @keyframes grain{ to { transform: translate3d(-20px, 14px, 0); } }
-
-    .scan{ position:absolute; inset:0; pointer-events:none; opacity:var(--scan-alpha); mix-blend-mode:soft-light; background:
-      repeating-linear-gradient(0deg, rgba(255,255,255,.15) 0 1px, transparent 1px 3px),
-      repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 4px);
-      animation: shimmer 12s linear infinite;
-    }
-    @keyframes shimmer{ from{ transform: translateY(0);} to{ transform: translateY(-24px);} }
-
-    /* CTA badge (optional) */
-    .cta{ position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 3; }
-    .cta a{ display:inline-block; padding:10px 16px; border-radius:999px; text-decoration:none; color:#02060a; background:#e6fff6; font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:12px; box-shadow:0 10px 30px rgba(102,255,204,0.28); transition: transform .2s ease, box-shadow .2s ease; }
-    .cta a:hover{ transform: translateY(-1px); box-shadow:0 14px 34px rgba(102,255,204,0.4);} 
-
-    /* Accessibility skip */
-    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-  .backfill{ position:absolute; inset:-2vmax; z-index:-1; background-image: var(--poster); background-size: cover; background-position:center; filter: blur(36px) brightness(0.55) saturate(1.2); transform: scale(1.08); }
-
-    /* On tall/portrait screens, allow a bit of cropping for better fill */
+    .backfill{ position:absolute; inset:-2vmax; z-index:-1; background-image: var(--poster); background-size: cover; background-position:center; filter: blur(36px) brightness(0.55) saturate(1.2); transform: scale(1.08); }
     @media (max-aspect-ratio: 3/4){
       .poster{ background-size: cover; inset:-2vmax; }
       .backfill{ filter: blur(28px) brightness(0.5) saturate(1.2); }
     }
+
+    .caustics{ position:absolute; inset:-20vmax; mix-blend-mode:overlay; opacity:.35; pointer-events:none;
+      background: radial-gradient(50% 60% at 30% 40%, var(--glow-a) 0%, transparent 60%), radial-gradient(60% 50% at 70% 60%, var(--glow-b) 0%, transparent 60%);
+      filter: blur(60px) saturate(140%);
+      animation: drift calc(var(--speed)*1.2) linear infinite; }
+    @keyframes drift{ to { transform: translate3d(8%, -6%, 0) rotate(30deg); } }
+
+    .sweep{ position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.35;
+      background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,.35) 50%, transparent 60%);
+      background-size: 200% 100%;
+      animation: sweep 7s ease-in-out infinite; filter: blur(4px); }
+    @keyframes sweep { 0%, 100% { background-position: -100% 0; } 50% { background-position: 100% 0; } }
+
+    .rgb{ position:absolute; inset:0; mix-blend-mode:screen; opacity:.18; pointer-events:none; filter: blur(1px);
+      background-image: var(--poster); background-size: cover; background-position:center;
+      animation: rgb 3.6s ease-in-out infinite; }
+    @keyframes rgb{ 0%,100%{ transform: translate(0,0);} 50%{ transform: translate(0.6px,-0.8px);} }
+
+    .grain{ position:absolute; inset:0; pointer-events:none; opacity:var(--grain-alpha); mix-blend-mode:overlay;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.7"/></svg>');
+      background-size: 220px 220px; animation: grain 1.8s steps(6) infinite; }
+    @keyframes grain{ to { transform: translate3d(-20px, 14px, 0); } }
+
+    .scan{ position:absolute; inset:0; pointer-events:none; opacity:var(--scan-alpha); mix-blend-mode:soft-light;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,.15) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 4px);
+      animation: shimmer 12s linear infinite; }
+    @keyframes shimmer{ from{ transform: translateY(0);} to{ transform: translateY(-24px);} }
+
+    .cta{ position: fixed; left: 50%; bottom: 6vh; transform: translateX(-50%); z-index: 3; }
+    .cta a{ display:inline-block; padding:14px 22px; border-radius:999px; text-decoration:none; color:#02060a; background:#e6fff6; font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:14px; box-shadow:0 10px 30px rgba(102,255,204,0.28); transition: transform .2s ease, box-shadow .2s ease; }
+    .cta a:hover{ transform: translateY(-1px); box-shadow:0 14px 34px rgba(102,255,204,0.4);} 
+
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   </style>
 </head>
 <body>
@@ -118,26 +93,8 @@
   </div>
 
   <main id="main" class="cta">
-    <!-- Optional: swap link target -->
-    <a href="#notify">Get Updates</a>
+    <a href="https://your-ticket-link.com" target="_blank" rel="noopener">Buy Tix</a>
   </main>
 
-  <!-- Optional ultra‑light email capture. Replace action with Formspree or your own endpoint. -->
-  <div id="notify" style="position: fixed; left: 50%; bottom: 10vh; transform: translateX(-50%); z-index: 3;">
-    <form action="https://formspree.io/f/your-id" method="POST" style="display:flex; gap:.5rem; background: rgba(2,6,10,0.45); padding:.5rem; border-radius:999px; backdrop-filter: blur(8px);">
-      <input required type="email" name="email" placeholder="your@email.com" aria-label="Email address" 
-        style="border:none; outline:none; background:transparent; color:white; padding:.6rem 1rem; min-width: min(60vw, 340px);" />
-      <button type="submit" class="cta-btn" style="margin:0; border:none; border-radius:999px; padding:10px 16px; font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:12px; color:#02060a; background:#e6fff6; cursor:pointer;">Notify Me</button>
-    </form>
-  </div>
-
-  <script>
-    // If you want to use a .png from the same folder, you can override via a query param like ?img=poster.png
-    (function(){
-      const url = new URL(window.location.href);
-      const img = url.searchParams.get('img');
-      if(img){ document.documentElement.style.setProperty('--poster', `url('${img}')`); }
-    })();
-  </script>
 </body>
 </html>
