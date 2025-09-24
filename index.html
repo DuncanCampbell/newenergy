@@ -49,20 +49,15 @@
       background-size: 220px 220px; animation: grain 1.8s steps(6) infinite; }
     @keyframes grain{ to { transform: translate3d(-20px, 14px, 0); } }
 
-    .cta{ position: fixed; left: 50%; bottom: calc(6vh + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 3; }
-    .cta a{ display:inline-block; padding:14px 22px; border-radius:999px; text-decoration:none; color:#02060a; background:#e6fff6; font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:14px; box-shadow:0 10px 30px rgba(102,255,204,0.28); transition: transform .2s ease, box-shadow .2s ease; }
-    .cta a:hover{ transform: translateY(-1px); box-shadow:0 14px 34px rgba(102,255,204,0.4);} 
+    .dvd{ position: fixed; left: 0; top: 0; z-index: 4; will-change: transform; }
+    .dvd a{ display:inline-block; padding:14px 22px; border-radius:999px; text-decoration:none; color:#02060a; background:#e6fff6; font-weight:800; letter-spacing:.02em; text-transform:uppercase; font-size:14px; box-shadow:0 10px 30px rgba(102,255,204,0.28); }
+    .dvd a:active{ transform: scale(0.98);} 
+    
+     
 
     .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
       /* ===== Distortion bubble ===== */
-    .bubble{ position:absolute; width:28vmin; height:28vmin; border-radius:50%; left:8%; top:18%; pointer-events:none; overflow:hidden; z-index:2;
-      -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 72%);
-              mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 72%);
-      box-shadow: 0 12px 60px rgba(0,0,0,.25);
-      animation: bubblePath 38s ease-in-out infinite alternate; }
-    .bubble-layer{ position: fixed; inset:0; }
-    .bubble-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; transform: scale(1.03); }
-    @keyframes bubblePath{ 0%{ transform: translate3d(0,0,0)} 50%{ transform: translate3d(40vw, 10vh, 0)} 100%{ transform: translate3d(8vw, 26vh, 0)} }
+    /* bubble removed */ 50%{ transform: translate3d(40vw, 10vh, 0)} 100%{ transform: translate3d(8vw, 26vh, 0)} }
     /* the bubble carries its own copy of the poster to fake refraction */
     .bubble img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter: contrast(1.04) saturate(1.06);
       transform: scaleX(1.08); /* slight aspect warp */
@@ -76,18 +71,15 @@
   <div class="stage" aria-hidden="true">
     <div class="frame">
       <img class="poster-img" src="new-energy-poster.jpeg" alt="New Energy Festival Poster" />
-      <div class="bubble">
-        <div class="bubble-layer">
-          <img class="bubble-img" src="new-energy-poster.jpeg" alt="" aria-hidden="true"/>
-        </div>
+      
       </div>
     </div>
     <div class="sweep"></div>
     <div class="grain"></div>
   </div>
 
-  <main id="main" class="cta">
-    <a href="https://your-ticket-link.com" target="_blank" rel="noopener">Buy Tix</a>
+  <main id="main" class="dvd" aria-live="polite">
+    <a href="https://your-ticket-link.com" target="_blank" rel="noopener" aria-label="Buy tickets">Buy Tix</a>
   </main>
 
   <script>
@@ -99,6 +91,58 @@
         document.querySelector('.poster-img').setAttribute('src', img);
         document.querySelector('.bubble-img').setAttribute('src', img);
       }
+    })();
+  </script>
+  <script>
+    // ===== Bouncing Buy Tix (DVD screensaver style) =====
+    (function(){
+      const el = document.querySelector('.dvd');
+      const btn = el.querySelector('a');
+      const SAFE_PAD = 12; // px
+      let vx = 0.24; // vw per frame baseline (scaled later)
+      let vy = 0.17;
+
+      // Set starting position ~ random
+      let x = Math.random() * (window.innerWidth * 0.5);
+      let y = Math.random() * (window.innerHeight * 0.5);
+
+      function bounds(){
+        const r = btn.getBoundingClientRect();
+        const insetBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0;
+        const insetTop = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)')) || 0;
+        return {
+          maxX: window.innerWidth - r.width - SAFE_PAD,
+          maxY: window.innerHeight - r.height - SAFE_PAD - insetBottom,
+          minX: SAFE_PAD,
+          minY: SAFE_PAD + insetTop
+        };
+      }
+
+      function step(){
+        const b = bounds();
+        // convert vw/vh-ish speeds to px by relating to current size
+        const speedScale = Math.max(window.innerWidth, window.innerHeight) * 0.0035; // tune speed here
+        x += vx * speedScale; y += vy * speedScale;
+        if(x <= b.minX){ x = b.minX; vx *= -1; }
+        if(y <= b.minY){ y = b.minY; vy *= -1; }
+        if(x >= b.maxX){ x = b.maxX; vx *= -1; }
+        if(y >= b.maxY){ y = b.maxY; vy *= -1; }
+        el.style.transform = `translate(${x}px, ${y}px)`;
+        requestAnimationFrame(step);
+      }
+
+      // Pause on hover/focus to make it tappable
+      let paused = false;
+      function pause(){ paused = true; }
+      function resume(){ if(paused){ paused = false; requestAnimationFrame(step); } }
+      el.addEventListener('mouseenter', pause);
+      el.addEventListener('mouseleave', resume);
+      btn.addEventListener('focus', pause);
+      btn.addEventListener('blur', resume);
+
+      // Kick off
+      requestAnimationFrame(step);
+      window.addEventListener('resize', ()=>{});
     })();
   </script>
 </body>
