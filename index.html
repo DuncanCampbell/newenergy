@@ -56,11 +56,13 @@
     .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
       /* ===== Distortion bubble ===== */
     .bubble{ position:absolute; width:28vmin; height:28vmin; border-radius:50%; left:8%; top:18%; pointer-events:none; overflow:hidden; z-index:2;
-      /* soft circular mask with feathered edge */
       -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 72%);
               mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 72%);
       box-shadow: 0 12px 60px rgba(0,0,0,.25);
       animation: bubblePath 38s ease-in-out infinite alternate; }
+    .bubble-layer{ position: fixed; inset:0; }
+    .bubble-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; transform: scale(1.03); }
+    @keyframes bubblePath{ 0%{ transform: translate3d(0,0,0)} 50%{ transform: translate3d(40vw, 10vh, 0)} 100%{ transform: translate3d(8vw, 26vh, 0)} }
     /* the bubble carries its own copy of the poster to fake refraction */
     .bubble img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter: contrast(1.04) saturate(1.06);
       transform: scaleX(1.08); /* slight aspect warp */
@@ -74,7 +76,11 @@
   <div class="stage" aria-hidden="true">
     <div class="frame">
       <img class="poster-img" src="new-energy-poster.jpeg" alt="New Energy Festival Poster" />
-      <div class="bubble"><img class="bubble-img" src="new-energy-poster.jpeg" alt="" aria-hidden="true"/></div>
+      <div class="bubble">
+        <div class="bubble-layer">
+          <img class="bubble-img" src="new-energy-poster.jpeg" alt="" aria-hidden="true"/>
+        </div>
+      </div>
     </div>
     <div class="sweep"></div>
     <div class="grain"></div>
