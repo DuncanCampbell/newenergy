@@ -24,7 +24,8 @@
     .poster{ display:none; } /* background-div no longer used */
 
     .frame{ position:absolute; inset:0; display:grid; place-items:center; overflow:hidden; }
-    .poster-img{ max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; image-rendering:auto; will-change:transform; animation: kbimg var(--speed, 45s) ease-in-out infinite alternate; filter: contrast(1.02) saturate(1.06); }
+    .poster-img{ max-width:100%; max-height:100vh; width:auto; height:auto; object-fit:contain; image-rendering:auto; filter: contrast(1.02) saturate(1.06); animation: none !important; transform: none !important; }
+    @supports (height: 100svh){ .poster-img{ max-height:100svh; } }
     @keyframes kbimg{ 0%{ transform: scale(1.0) translate3d(0,0,0) rotate(0deg)} 50%{ transform: scale(1.08) translate3d(1%, -1%, 0) rotate(0.15deg)} 100%{ transform: scale(1.12) translate3d(-1%, 1%, 0) rotate(-0.15deg)} }
     @keyframes kb{
       0%{ transform: scale(1.0) translate3d(0,0,0) }
@@ -38,15 +39,10 @@
     .rgb, .scan { display:none; } /* keep problematic layers off */
 
     /* Keep these lightweight, non-text overlays for vibe */
-    .sweep{ position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.28;
-      background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,.3) 50%, transparent 60%);
-      background-size: 220% 100%;
-      animation: sweep 7s ease-in-out infinite; filter: blur(4px); }
+    .sweep{ position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.18; background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,.22) 50%, transparent 60%); background-size: 220% 100%; animation: sweep 8s ease-in-out infinite; filter: blur(2px); }
     @keyframes sweep { 0%, 100% { background-position: -100% 0; } 50% { background-position: 100% 0; } }
 
-    .grain{ position:absolute; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.7"/></svg>');
-      background-size: 220px 220px; animation: grain 1.8s steps(6) infinite; }
+    .grain{ position:absolute; inset:0; pointer-events:none; opacity:0; mix-blend-mode:overlay; background:none; } /* grain disabled on desktop to avoid jitter */
     @keyframes grain{ to { transform: translate3d(-20px, 14px, 0); } }
 
     .dvd{ position: fixed; left: 0; top: 0; z-index: 4; will-change: transform; }
@@ -64,6 +60,13 @@
       transform-origin:center; animation: kbimg var(--speed, 45s) ease-in-out infinite alternate; }
     @keyframes bubblePath{ 0%{ transform: translate3d(0,0,0)} 50%{ transform: translate3d(40vw, 10vh, 0)} 100%{ transform: translate3d(8vw, 26vh, 0)} }
 
+      /* Desktop/landscape: keep full poster in view (limit zoom & enable gentle motion) */
+    /* desktop-wide override removed: always keep full poster visible */
+      @keyframes kbimgWide{ 0%{ transform: scale(1.0) translate3d(0,0,0) } 100%{ transform: scale(1.03) translate3d(0.2%, -0.2%, 0) } }
+    }
+    /* Portrait/mobile: stronger motion */
+    /* mobile animation override removed */ }
+  .contact{ position:fixed; right:14px; bottom:14px; z-index:5; color:#000; text-decoration:underline; font-weight:600; }
   </style>
 </head>
 <body>
@@ -99,8 +102,9 @@
       const el = document.querySelector('.dvd');
       const btn = el.querySelector('a');
       const SAFE_PAD = 12; // px
-      let vx = 0.24; // vw per frame baseline (scaled later)
-      let vy = 0.17;
+      // speed in pixels per second (time-based, consistent across devices)
+      let speedX = Math.min(window.innerWidth, window.innerHeight) * 0.10; // px/sec
+      let speedY = Math.min(window.innerWidth, window.innerHeight) * 0.08; // px/sec
 
       // Set starting position ~ random
       let x = Math.random() * (window.innerWidth * 0.5);
@@ -118,11 +122,13 @@
         };
       }
 
-      function step(){
+      let last = performance.now();
+      function step(now){
+        if(paused){ last = now; return requestAnimationFrame(step); }
+        const dt = Math.min(0.05, (now - last) / 1000); // clamp big jumps, seconds
+        last = now;
         const b = bounds();
-        // convert vw/vh-ish speeds to px by relating to current size
-        const speedScale = Math.max(window.innerWidth, window.innerHeight) * 0.0035; // tune speed here
-        x += vx * speedScale; y += vy * speedScale;
+        x += Math.sign(vx) * speedX * dt; y += Math.sign(vy) * speedY * dt;
         if(x <= b.minX){ x = b.minX; vx *= -1; }
         if(y <= b.minY){ y = b.minY; vy *= -1; }
         if(x >= b.maxX){ x = b.maxX; vx *= -1; }
@@ -142,8 +148,22 @@
 
       // Kick off
       requestAnimationFrame(step);
+      }
+
+      // Pause on hover/focus to make it tappable
+      let paused = false;
+      function pause(){ paused = true; }
+      function resume(){ if(paused){ paused = false; requestAnimationFrame(step); } }
+      el.addEventListener('mouseenter', pause);
+      el.addEventListener('mouseleave', resume);
+      btn.addEventListener('focus', pause);
+      btn.addEventListener('blur', resume);
+
+      // Kick off
+      requestAnimationFrame(step);
       window.addEventListener('resize', ()=>{});
     })();
   </script>
+  <a class="contact" href="https://your-contact-url.com" target="_blank" rel="noopener">Contact Us</a>
 </body>
 </html>
