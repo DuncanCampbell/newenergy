@@ -20,11 +20,13 @@
 
     .stage{ position:fixed; inset:0; overflow:hidden; background:#05080c; min-height:100vh; }
     @supports (height: 100svh){ .stage{ min-height:100svh; } }
+    @supports (height: 100svh){ .stage{ min-height:100svh; } }
 
     .poster{ display:none; } /* background-div no longer used */
 
     .frame{ position:absolute; inset:0; display:grid; place-items:center; overflow:hidden; }
-    .poster-img{ max-width:100%; max-height:100vh; width:auto; height:auto; object-fit:contain; image-rendering:auto; filter: contrast(1.02) saturate(1.06); animation: none !important; transform: none !important; }
+    .poster-img{ max-width:100%; max-height:100vh; width:auto; height:auto; object-fit:contain; image-rendering:auto; filter: contrast(1.02) saturate(1.06); animation: none !important; transform: none !important; z-index:1; position:relative; }
+    @supports (height: 100svh){ .poster-img{ max-height:100svh; } }
     @supports (height: 100svh){ .poster-img{ max-height:100svh; } }
     @keyframes kbimg{ 0%{ transform: scale(1.0) translate3d(0,0,0) rotate(0deg)} 50%{ transform: scale(1.08) translate3d(1%, -1%, 0) rotate(0.15deg)} 100%{ transform: scale(1.12) translate3d(-1%, 1%, 0) rotate(-0.15deg)} }
     @keyframes kb{
@@ -67,11 +69,18 @@
     /* Portrait/mobile: stronger motion */
     /* mobile animation override removed */ }
   .contact{ position:fixed; right:14px; bottom:14px; z-index:5; color:#000; text-decoration:underline; font-weight:600; }
+  .backfill{ position:fixed; inset:-3vmax; z-index:0; pointer-events:none;
+      background-image: var(--poster, url('new-energy-poster.jpeg')); background-size: cover; background-position:center;
+      filter: blur(46px) brightness(0.55) saturate(1.15); transform: scale(1.08); }
+
+    /* keep decorative overlays minimal on desktop */
+    .grain{ display:none; }
   </style>
 </head>
 <body>
   <a class="sr-only" href="#main">Skip to content</a>
   <div class="stage" aria-hidden="true">
+    <div class="backfill" aria-hidden="true"></div>
     <div class="frame">
       <img class="poster-img" src="new-energy-poster.jpeg" alt="New Energy Festival Poster" />
       
@@ -102,18 +111,19 @@
       const el = document.querySelector('.dvd');
       const btn = el.querySelector('a');
       const SAFE_PAD = 12; // px
-      // speed in pixels per second (time-based, consistent across devices)
-      let speedX = Math.min(window.innerWidth, window.innerHeight) * 0.10; // px/sec
-      let speedY = Math.min(window.innerWidth, window.innerHeight) * 0.08; // px/sec
+      // ----- time-based speed (consistent across devices) -----
+      const base = Math.min(window.innerWidth, window.innerHeight);
+      let speedX = base * 0.07; // px/sec desktop-friendly
+      let speedY = base * 0.06; // px/sec
 
-      // Set starting position ~ random
+      // starting position
       let x = Math.random() * (window.innerWidth * 0.5);
       let y = Math.random() * (window.innerHeight * 0.5);
 
       function bounds(){
         const r = btn.getBoundingClientRect();
-        const insetBottom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0;
-        const insetTop = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-top)')) || 0;
+        const insetBottom = 0;
+        const insetTop = 0;
         return {
           maxX: window.innerWidth - r.width - SAFE_PAD,
           maxY: window.innerHeight - r.height - SAFE_PAD - insetBottom,
@@ -122,9 +132,30 @@
         };
       }
 
+      let paused = false;
+      function pause(){ paused = true; }
+      function resume(){ paused = false; }
+      el.addEventListener('mouseenter', pause);
+      el.addEventListener('mouseleave', resume);
+      btn.addEventListener('focus', pause);
+      btn.addEventListener('blur', resume);
+
       let last = performance.now();
       function step(now){
-        if(paused){ last = now; return requestAnimationFrame(step); }
+        const dt = Math.min(0.05, (now - last) / 1000); // seconds
+        last = now;
+        if(!paused){
+          const b = bounds();
+          x += Math.sign(vx) * speedX * dt; y += Math.sign(vy) * speedY * dt;
+          if(x <= b.minX){ x = b.minX; vx *= -1; }
+          if(y <= b.minY){ y = b.minY; vy *= -1; }
+          if(x >= b.maxX){ x = b.maxX; vx *= -1; }
+          if(y >= b.maxY){ y = b.maxY; vy *= -1; }
+          el.style.transform = `translate(${x}px, ${y}px)`;
+        }
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step); }
         const dt = Math.min(0.05, (now - last) / 1000); // clamp big jumps, seconds
         last = now;
         const b = bounds();
