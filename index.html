@@ -93,6 +93,7 @@
   <main id="main" class="dvd" aria-live="polite">
     <a href="https://your-ticket-link.com" target="_blank" rel="noopener" aria-label="Buy tickets">Buy Tix</a>
   </main>
+  <a class="contact" href="mailto:hello@newenergyfestival.com" target="_blank" rel="noopener">Contact Us</a>
 
   <script>
     // Allow ?img= override while defaulting to current jpeg path
@@ -110,11 +111,14 @@
     (function(){
       const el = document.querySelector('.dvd');
       const btn = el.querySelector('a');
-      const SAFE_PAD = 12; // px
-      // ----- time-based speed (consistent across devices) -----
+      const SAFE_PAD = 12; // px padding from edges
+      // ----- time-based bounce (consistent speed across devices) -----
       const base = Math.min(window.innerWidth, window.innerHeight);
-      let speedX = base * 0.07; // px/sec desktop-friendly
-      let speedY = base * 0.06; // px/sec
+      let speedX = base * 0.07; // px/sec (tune)
+      let speedY = base * 0.06; // px/sec (tune)
+      // directions (±1)
+      let vx = Math.random() > 0.5 ? 1 : -1;
+      let vy = Math.random() > 0.5 ? 1 : -1;
 
       // starting position
       let x = Math.random() * (window.innerWidth * 0.5);
@@ -122,13 +126,11 @@
 
       function bounds(){
         const r = btn.getBoundingClientRect();
-        const insetBottom = 0;
-        const insetTop = 0;
         return {
           maxX: window.innerWidth - r.width - SAFE_PAD,
-          maxY: window.innerHeight - r.height - SAFE_PAD - insetBottom,
+          maxY: window.innerHeight - r.height - SAFE_PAD,
           minX: SAFE_PAD,
-          minY: SAFE_PAD + insetTop
+          minY: SAFE_PAD
         };
       }
 
@@ -142,11 +144,11 @@
 
       let last = performance.now();
       function step(now){
-        const dt = Math.min(0.05, (now - last) / 1000); // seconds
+        const dt = Math.min(0.05, (now - last) / 1000); // seconds (clamped)
         last = now;
         if(!paused){
           const b = bounds();
-          x += Math.sign(vx) * speedX * dt; y += Math.sign(vy) * speedY * dt;
+          x += vx * speedX * dt; y += vy * speedY * dt;
           if(x <= b.minX){ x = b.minX; vx *= -1; }
           if(y <= b.minY){ y = b.minY; vy *= -1; }
           if(x >= b.maxX){ x = b.maxX; vx *= -1; }
@@ -154,6 +156,8 @@
           el.style.transform = `translate(${x}px, ${y}px)`;
         }
         requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
       }
       requestAnimationFrame(step); }
         const dt = Math.min(0.05, (now - last) / 1000); // clamp big jumps, seconds
